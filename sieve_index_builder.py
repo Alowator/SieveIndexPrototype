@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 import sys
@@ -15,7 +16,7 @@ class SieveIndexBuilder:
         for f in os.listdir(table_path):
             if os.path.isfile(os.path.join(table_path, f)):
                 self.data_files.append(f)
-        self.data_files = self.data_files[:10]
+        logging.info(f"Builder initialized with {len(self.data_files)} files.")
 
     def build_index(self, column_name: str) -> SieveIndex:
         data = self._get_data(column_name)
@@ -38,7 +39,6 @@ class SieveIndexBuilder:
             with open(os.path.join(directory, filename), 'rb') as file:
                 segments.append(pickle.load(file))
         return SieveIndex(segments)
-
 
     def _segment_data(self, data) -> List[Segment]:
         sieve_gap_percent = 0.01
@@ -117,7 +117,8 @@ class SieveIndexBuilder:
 
     def _get_data(self, column_name: str) -> Dict[Any, Set[str]]:
         data = {}
-        for data_file in self.data_files:
+        for index, data_file in enumerate(self.data_files):
+            logging.info(f"Read files: {index + 1} of {len(self.data_files)}.")
             parquet_file = pp.ParquetFile(self._get_data_file_path(data_file))
             num_row_groups = parquet_file.num_row_groups
             for row_group_index in range(num_row_groups):
@@ -128,5 +129,4 @@ class SieveIndexBuilder:
                         data[value] = {data_file}
                     else:
                         data[value].add(data_file)
-
         return data

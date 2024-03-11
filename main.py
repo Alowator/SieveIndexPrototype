@@ -1,4 +1,8 @@
+import logging
+
 from sieve_index_builder import SieveIndexBuilder
+
+logging.basicConfig(level = logging.DEBUG, format = '%(asctime)s [%(levelname)s] %(message)s')
 
 def build():
     builder = SieveIndexBuilder('./table')
